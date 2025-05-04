@@ -1,0 +1,265 @@
+#register.component.html
+
+<div class="container">
+  <h2>Create Account</h2>
+  <form (ngSubmit)="register()">
+    <input type="text" [(ngModel)]="user.name" name="name" placeholder="Your Name" required />
+    <input type="email" [(ngModel)]="user.email" name="email" placeholder="Email Address" required />
+    <input type="password" [(ngModel)]="user.password" name="password" placeholder="Password" required />
+    <button type="submit">Register</button>
+  </form>
+  <a routerLink="/login">Already have an account? Login</a>
+</div>
+
+---------------------------------------------------------------
+
+#login.component.html
+
+<div class="container">
+  <h2>Welcome Back</h2>
+  <form (ngSubmit)="login()">
+    <input type="email" [(ngModel)]="email" name="email" placeholder="Email" required />
+    <input type="password" [(ngModel)]="password" name="password" placeholder="Password" required />
+    <button type="submit">Login</button>
+  </form>
+  <a routerLink="/register">Don’t have an account? Register</a>
+</div>
+
+
+-----------------------------------------------------------------
+
+#profile.component.html
+
+<div class="container">
+  <h2>Hello, {{ user?.name }} 👋</h2>
+  <p>Email: <strong>{{ user?.email }}</strong></p>
+  <button (click)="logout()">Logout</button>
+</div>
+
+----------------------------------------------------------------
+
+#register.component.ts
+
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-register',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.css']
+})
+export class RegisterComponent {
+  user = {
+    name: '',
+    email: '',
+    password: ''
+  };
+
+  constructor(private router: Router) {}
+
+  register() {
+    localStorage.setItem('user', JSON.stringify(this.user));
+    alert('Registered successfully!');
+    this.router.navigate(['/login']);
+  }
+}
+
+
+--------------------------------------------------------------
+
+#login.component.ts
+
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
+})
+export class LoginComponent {
+  email = '';
+  password = '';
+
+  constructor(private router: Router) {}
+
+  login() {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user.email === this.email && user.password === this.password) {
+        alert('Login successful!');
+        this.router.navigate(['/profile']);
+      } else {
+        alert('Invalid email or password.');
+      }
+    } else {
+      alert('No user registered.');
+    }
+  }
+}
+
+
+----------------------------------------------------------------
+
+#profile.component.ts
+
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-profile',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.css']
+})
+export class ProfileComponent {
+  user: any;
+
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    const storedUser = localStorage.getItem('user');
+    this.user = storedUser ? JSON.parse(storedUser) : null;
+  }
+
+  logout() {
+    this.router.navigate(['/login']);
+  }
+}
+
+
+--------------------------------------------------------
+
+#auth.service.ts
+
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private storageKey = 'userData';
+
+  constructor() { }
+
+  register(user: any): boolean {
+    localStorage.setItem(this.storageKey, JSON.stringify(user));
+    return true;
+  }
+
+  login(email: string, password: string): boolean {
+    const user = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+    if (user && user.email === email && user.password === password) {
+      localStorage.setItem('isLoggedIn', 'true');
+      return true;
+    }
+    return false;
+  }
+
+  getUserData() {
+    return JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+  }
+
+  isLoggedIn(): boolean {
+    return localStorage.getItem('isLoggedIn') === 'true';
+  }
+
+  logout() {
+    localStorage.setItem('isLoggedIn', 'false');
+  }
+}
+
+
+-----------------------------------------------------------
+
+#app.routes.ts
+
+import { Routes } from '@angular/router';
+import { RegisterComponent } from './register/register.component';
+import { LoginComponent } from './login/login.component';
+import { ProfileComponent } from './profile/profile.component';
+
+export const routes: Routes = [
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'register', component: RegisterComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'profile', component: ProfileComponent },
+];
+
+
+----------------------------------------------------------
+
+#styles.css
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f4f6f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  background: #fff;
+  padding: 2rem 3rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+button {
+  background-color: #007bff;
+  border: none;
+  padding: 10px 15px;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+a {
+  display: inline-block;
+  margin-top: 15px;
+  text-decoration: none;
+  color: #007bff;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
+
+
