@@ -1,0 +1,95 @@
+#index.html 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Movie Ticket Booking</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Book Your Movie Ticket</h1>
+  <form id="bookingForm">
+    <label for="movie">Select Movie:</label>
+    <select id="movie">
+      <option value="Avengers">Avengers</option>
+      <option value="Inception">Inception</option>
+      <option value="Joker">Joker</option>
+    </select>
+
+    <label for="seats">Number of Seats:</label>
+    <input type="number" id="seats" min="1" max="10" required>
+
+    <button type="submit">Book Now</button>
+  </form>
+
+  <div id="output"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+-----------------------------------------------------
+
+#styles.css
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin-top: 50px;
+  background: #f2f2f2;
+}
+
+form {
+  display: inline-block;
+  text-align: left;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+}
+
+input, select, button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+}
+
+#output {
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+
+-----------------------------------------
+
+#script.js
+
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const movie = document.getElementById('movie').value;
+  const seats = document.getElementById('seats').value;
+  document.getElementById('output').textContent = 
+    `You have booked ${seats} seat(s) for "${movie}". Enjoy your movie!`;
+});
+
+
+---------------------------------------------------
+
+#server.js
+
+const express = require('express');
+const app = express();
+const path = require('path');
+
+const PORT = 3000;
+
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
+
+
